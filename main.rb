@@ -7,32 +7,48 @@ if (Gem.win_platform?)
     io.set_encoding(Encoding.default_external, Encoding.default_internal)
   end
 end
-#Подключили класс
+
 require_relative 'lib/film'
-#Пути к файлам
-files_list = Dir.glob("#{__dir__}/data/*.txt")
+require_relative 'lib/film_collection'
 
-films_collection = files_list.map { |path| File.readlines(path, encoding: 'UTF-8', chomp: true) }
-films_collection = films_collection.map { |film| Film.new(film[0], film[1], film[2].to_i) }
+def choice(attribute, collection)
+  attributes = collection.attributes_values(attribute)
 
-puts "Фильм какого режисера вы хотите сегодня посмотреть?"
+  attributes.each.with_index(1) do |attribute, index|
+    puts "#{index}) #{attribute}"
+  end
 
-produsers_list = films_collection.map { |film| film.producer }.uniq
+  result = []
 
-produsers_list.each_with_index do |producer, index|
-  puts "#{index + 1}. #{producer}"
+  loop do
+    print "Ввод:"
+    choice = gets.chomp
+    choice_num = choice.to_i
+    return result if choice == 'next'
+
+    if attributes[choice_num - 1] != nil && choice_num > 0
+      result << attributes[choice_num - 1]
+    end
+    puts "Текущая конфигурация: #{result.uniq.to_s}"
+  end
 end
 
-user_choice = 0
+collection = FilmCollection.from_kinopoisk
 
-until (1..produsers_list.size).include?(user_choice) do
-  print "Введите номер режисера:"
-  user_choice = gets.to_i
-end
+puts 'приложение Кинопоиск для труъ консольщиков'
+puts 'Настройте фильтр выдачи! Вводите номер элемента что бы выбрать его' \
+  ' или \'next\' что бы продолжить'
 
-choice_producer = produsers_list[user_choice - 1]
+puts 'Страны производства:'
+selected_countries = choice("countries", collection)
 
-current_films = films_collection.select { |film| film.producer == choice_producer }
+puts 'Жанры:'
+selected_genres = choice("genres", collection)
 
-random_film = current_films.sample
-puts "#{random_film.producer} - #{random_film.name} (#{random_film.year_of_issue})"
+filter = {
+  "genres" => selected_genres,
+  "countries" => selected_countries }
+
+valide_collection = collection.with_filter(filter)
+puts valide_collection.to_s
+

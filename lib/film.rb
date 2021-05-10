@@ -1,19 +1,37 @@
 class Film
-  attr_reader :name, :producer, :year_of_issue
+  attr_reader :attributes
 
-  def initialize(name, producer, year_of_issue)
-    @name = name
-    @producer = producer
-    @year_of_issue = year_of_issue
-  end
-
-  def self.from_file(path)
-    file = File.readlines(path, encoding: 'UTF-8', chomp: true)
-    self.new(file[0], file[1], file[2])
+  def initialize(args)
+    @attributes = {
+      "name" => args['nameRu'],
+      "year_of_issue" => args['year'],
+      "genres" => args['genres'],
+      "countries" => args['countries'] }
   end
 
   def to_s
-    "#{@producer} - #{@name} (#{@year_of_issue})"
+    "#{@attributes["name"]}"
+  end
+
+  def valide?(filter_params)
+    genres_valide = true
+    countries_valide = true
+
+    @attributes["genres"].each do |arr|
+
+    unless filter_params["genres"].include?(arr.values.last)
+      genres_valide = false
+      next
+    end
+    end
+
+    @attributes["countries"].each do |arr|
+
+    unless filter_params["countries"].include?(arr.values.last)
+      countries_valide = false
+    end
+    end
+    genres_valide && countries_valide
   end
 
 end
