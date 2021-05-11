@@ -25,6 +25,7 @@ def choice(attribute, collection)
     choice = gets.chomp
     choice_num = choice.to_i
     return result if choice == 'next'
+    return attributes if choice == 'all'
 
     if attributes[choice_num - 1] != nil && choice_num > 0
       result << attributes[choice_num - 1]
@@ -33,11 +34,13 @@ def choice(attribute, collection)
   end
 end
 
+puts 'Приложение Кинопоиск для труъ консольщиков'
+puts 'Получаю список фильмов из сети...'
+
 collection = FilmCollection.from_kinopoisk
 
-puts 'приложение Кинопоиск для труъ консольщиков'
 puts 'Настройте фильтр выдачи! Вводите номер элемента что бы выбрать его' \
-  ' или \'next\' что бы продолжить'
+  ' \'all\' - что бы выбрать все и \'next\' что бы продолжить'
 
 puts 'Страны производства:'
 selected_countries = choice("countries", collection)
@@ -48,7 +51,23 @@ selected_genres = choice("genres", collection)
 filter = {
   "genres" => selected_genres,
   "countries" => selected_countries }
-
 valide_collection = collection.with_filter(filter)
-puts valide_collection.to_s
+puts 'Фильмы подобраны согласно фильтру'
+puts '\'all\' - весь список / \'one\' - один случайный фильм'
+
+loop do
+  print 'Ввод:'
+  choice = gets.chomp
+
+  if choice == 'all'
+    puts valide_collection.to_s
+    break
+  elsif choice == 'one'
+    puts valide_collection.sample_film
+    break
+  end
+end
+
+
+
 

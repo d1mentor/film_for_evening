@@ -3,35 +3,51 @@ class Film
 
   def initialize(args)
     @attributes = {
-      "name" => args['nameRu'],
-      "year_of_issue" => args['year'],
-      "genres" => args['genres'],
-      "countries" => args['countries'] }
+    "name" => args['name'],
+    "year_of_issue" => args['year'],
+    "genres" => args['genres'],
+    "countries" => args['countries'] }
+  end
+
+  def self.from_kinopoisk_hash(film_hash)
+    genres = []
+    countries = []
+
+    film_hash['genres'].each do |genre|
+      genres << genre.values.last.to_s
+    end
+
+    film_hash['countries'].each do |country|
+      countries << country.values.last.to_s
+    end
+
+    args = {
+      "name" => film_hash['nameRu'],
+      "year" => film_hash['year'],
+      "genres" => genres,
+      "countries" => countries }
+
+    new(args)
   end
 
   def to_s
-    "#{@attributes["name"]}"
+    "\'#{@attributes["name"]}\' - #{@attributes["genres"].join(', ')} " \
+    "(#{@attributes["countries"].join(', ')} - #{@attributes["year_of_issue"]}г.)"
   end
 
   def valide?(filter_params)
-    genres_valide = true
-    countries_valide = true
+    filter_keys = filter_params.keys
+    result = []
 
-    @attributes["genres"].each do |arr|
+    filter_keys.each do |key|
+      filter_params[key].each do |value|
+        if @attributes[key].include?(value)
+          result << true
+          break
+        end
+      end
+    end
 
-    unless filter_params["genres"].include?(arr.values.last)
-      genres_valide = false
-      next
-    end
-    end
-
-    @attributes["countries"].each do |arr|
-
-    unless filter_params["countries"].include?(arr.values.last)
-      countries_valide = false
-    end
-    end
-    genres_valide && countries_valide
+    filter_keys.size == result.size
   end
-
 end
