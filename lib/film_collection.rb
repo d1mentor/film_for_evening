@@ -12,7 +12,7 @@ class FilmCollection
   def self.from_kinopoisk
     films_hashes = []
 
-    #Запрашиваем через апи топ фильмов
+    #Запрашиваем через апи топ 250 фильмов
     for i in 1..15
       response = RestClient.get(API_TOP_FILMS_URL + i.to_s,
         header = { "X-API-KEY" => '012a078c-8f87-49e4-ad18-b5d3ec52de12' })
@@ -22,7 +22,7 @@ class FilmCollection
       sleep(0.5)
     end
 
-    #Создаем массив фильмов
+    #Создаем массив фильмов(обьектов)
     films = []
 
     films_hashes.each do |films_hash|
@@ -31,10 +31,12 @@ class FilmCollection
     new(films)
   end
 
+  #Получить массив возможных значений атрибута (Все жанры например)
   def attributes_values(attribute)
     result = []
     @films.each do |film|
 
+      #Значением может быть массив значений, предусматриваем это
       if film.attributes[attribute].class == Array
         film.attributes[attribute].each { |string| result << string }
       else
@@ -47,6 +49,7 @@ class FilmCollection
   def with_filter(filter_params)
     valide_films = []
 
+    #Создаем новую коллекцию только с валидными фильмами
     @films.each do |film|
       if film.valide?(filter_params)
         valide_films << film
@@ -56,6 +59,7 @@ class FilmCollection
     FilmCollection.new(valide_films)
   end
 
+  #Получить список фильмов коллекции в виде строки
   def to_s
     result_str = "-"
 
@@ -64,6 +68,7 @@ class FilmCollection
     end
   end
 
+  #Получить случайный фильм из коллекции
   def sample_film
     @films.sample.to_s
   end
